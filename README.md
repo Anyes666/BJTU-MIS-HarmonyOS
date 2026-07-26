@@ -1,5 +1,7 @@
 # BJTU MIS HarmonyOS
 
+本项目的部分实现思路参考了 [wan300/bjtu_mis_Android](https://github.com/wan300/bjtu_mis_Android.git) 和 [HFDLYS/BJTUselfService](https://github.com/HFDLYS/BJTUselfService.git)。
+
 一个面向北京交通大学学生的非官方 HarmonyOS 教学项目。项目尝试将课表、考试、成绩等常用教务信息整理为清晰的原生界面，并在用户完成学校官方登录后保存本地离线快照，减少重复打开网页查询的操作。
 
 > [!IMPORTANT]
