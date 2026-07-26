@@ -1,0 +1,96 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "app_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "app_surface",
+      "value": "#F2F2F7"
+    },
+    {
+      "name": "app_card",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "app_primary",
+      "value": "#007AFF"
+    },
+    {
+      "name": "app_on_primary",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "app_primary_light",
+      "value": "#E8F0FE"
+    },
+    {
+      "name": "app_secondary",
+      "value": "#5856D6"
+    },
+    {
+      "name": "app_success",
+      "value": "#248A3D"
+    },
+    {
+      "name": "app_warning",
+      "value": "#C93400"
+    },
+    {
+      "name": "app_danger",
+      "value": "#D70015"
+    },
+    {
+      "name": "app_danger_background",
+      "value": "#FFF0F0"
+    },
+    {
+      "name": "app_text_primary",
+      "value": "#1C1C1E"
+    },
+    {
+      "name": "app_text_secondary",
+      "value": "#636366"
+    },
+    {
+      "name": "app_text_disabled",
+      "value": "#8E8E93"
+    },
+    {
+      "name": "app_border",
+      "value": "#D1D1D6"
+    },
+    {
+      "name": "app_tab_background",
+      "value": "#FAFAFA"
+    },
+    {
+      "name": "app_top_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "app_course_default",
+      "value": "#2E7D98"
+    },
+    {
+      "name": "app_course_required",
+      "value": "#3B6EA8"
+    },
+    {
+      "name": "app_course_elective",
+      "value": "#7566A8"
+    },
+    {
+      "name": "app_course_lab",
+      "value": "#A56A34"
+    },
+    {
+      "name": "app_course_sport",
+      "value": "#3A7D5B"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+/node_modules
+/oh_modules
+/local.properties
+/.idea
+**/build
+/.hvigor
+.cxx
+/.clangd
+/.clang-format
+/.clang-tidy
+**/.test
+/.appanalyzer
+/.cache
+/.Codex
+/.agents
+
+# Local signing materials and environment files
+*.p12
+*.p7b
+*.cer
+*.pem
+*.key
+*.jks
+.env
+.env.*
+
+# Generated packages and logs
+*.hap
+*.hsp
+*.app
+*.log
+*.tmp
+*.bak

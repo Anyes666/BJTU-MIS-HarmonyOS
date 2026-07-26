@@ -1,0 +1,9 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "BJTU MIS HarmonyOS entry module",
+  "main": "",
+  "author": "Anyes666",
+  "license": "MIT",
+  "dependencies": {}
+}

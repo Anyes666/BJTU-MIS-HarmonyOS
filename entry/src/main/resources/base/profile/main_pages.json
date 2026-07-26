@@ -1,0 +1,15 @@
+{
+  "src": [
+    "pages/HomePage",
+    "pages/MisWebPage",
+    "pages/CourseDetailPage",
+    "pages/GradeDetailPage",
+    "pages/ProfilePage",
+    "pages/ProgressPage",
+    "pages/CalendarPage",
+    "pages/SyncCenterPage",
+    "pages/MailPage",
+    "pages/MailDetailPage",
+    "pages/MailOfficialPage"
+  ]
+}

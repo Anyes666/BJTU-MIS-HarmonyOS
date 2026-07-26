@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_test_desc",
+      "value": "BjtuMis tests"
+    },
+    {
+      "name": "TestAbility_desc",
+      "value": "BjtuMis test ability"
+    },
+    {
+      "name": "TestAbility_label",
+      "value": "BjtuMis Tests"
+    }
+  ]
+}
