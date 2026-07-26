@@ -69,6 +69,7 @@ export class SyncCoordinator {
   private status: SyncStatus = new SyncStatus();
   private currentUrl: string = '';
   private timeoutId: number = -1;
+  private deferredTimeoutIds: Array<number> = [];
   private pendingTerms: Array<GradeTermOption> = [];
   private currentTermIndex: number = 0;
   private pendingTimetableTerms: Array<GradeTermOption> = [];
@@ -108,6 +109,7 @@ export class SyncCoordinator {
   private scoreTermDiscoveryRunning: boolean = false;
   private scoreTermDiscoverySignature: string = '';
   private scoreTermDiscoveryStableObservations: number = 0;
+  private scoreTermDiscoveryReloads: number = 0;
   private scoreTermPageAttempts: number = 0;
   private scoreTypeIndex: number = 0;
   private onStatusChanged: (status: SyncStatus) => void;
@@ -201,7 +203,7 @@ export class SyncCoordinator {
   }
 
   private resetRun(): void {
-    this.cancelTimeout();
+    this.cancelAllTimeouts();
     this.status = new SyncStatus();
     this.pendingTerms = [];
     this.currentTermIndex = 0;
@@ -243,6 +245,7 @@ export class SyncCoordinator {
     this.scoreTermDiscoveryRunning = false;
     this.scoreTermDiscoverySignature = '';
     this.scoreTermDiscoveryStableObservations = 0;
+    this.scoreTermDiscoveryReloads = 0;
     this.scoreTermPageAttempts = 0;
     this.scoreTypeIndex = 0;
   }
@@ -319,10 +322,17 @@ export class SyncCoordinator {
       this.parseMail();
       return;
     }
-    if ((this.status.phase === SyncPhase.DISCOVERING_SCORE_TERMS ||
-         this.status.phase === SyncPhase.LOADING_SCORE_TERM) &&
+    if (SyncCoordinator.isAggregateGradePhase(this.status.phase) &&
         page.host === 'aa.bjtu.edu.cn' && page.path.includes('/score/scores/stu/view/')) {
-      this.parseAggregateScorePage();
+      if (SyncCoordinator.isHistoricalGradeTermPhase(this.fullGradeSync, this.scoreTypeIndex)) {
+        if (this.status.phase === SyncPhase.DISCOVERING_SCORE_TERMS) {
+          this.discoverScoreTerms();
+        } else {
+          this.parseCurrentScoreTerm();
+        }
+      } else {
+        this.parseAggregateScorePage();
+      }
     }
   }
 
@@ -494,7 +504,7 @@ export class SyncCoordinator {
           this.loadNextTimetableTerm();
           return;
         }
-        setTimeout(() => {
+        this.scheduleDeferred(() => {
           if (this.status.running && this.status.phase === SyncPhase.LOADING_TIMETABLE) {
             this.parseTimetable();
           }
@@ -566,7 +576,7 @@ export class SyncCoordinator {
           this.nextAfterExams();
           return;
         }
-        setTimeout(() => {
+        this.scheduleDeferred(() => {
           if (this.status.running && this.status.phase === SyncPhase.LOADING_EXAMS) {
             this.parseExams();
           }
@@ -643,13 +653,19 @@ export class SyncCoordinator {
   }
 
   private openScores(): void {
-    this.scoreTypeIndex = 0;
     this.grades = [];
     this.gradeTerms = [];
     this.gradeTermsParsed = [];
     this.scoreTermPageAttempts = 0;
-    this.transition(SyncPhase.DISCOVERING_SCORE_TERMS, '正在同步历年成绩');
-    this.controller.loadUrl(SCORE_BASE_URL + SCORE_TYPES[this.scoreTypeIndex]);
+    if (this.fullGradeSync) {
+      this.scoreTypeIndex = 0;
+      this.transition(SyncPhase.DISCOVERING_SCORE_TERMS, '正在发现历史成绩学期');
+      this.controller.loadUrl(SCORE_BASE_URL + SCORE_TYPES[this.scoreTypeIndex]);
+    } else {
+      this.scoreTypeIndex = 1;
+      this.transition(SyncPhase.LOADING_SCORE_TERM, '正在同步本学期成绩');
+      this.openCurrentScorePage();
+    }
   }
 
   private parseAggregateScorePage(): void {
@@ -666,7 +682,7 @@ export class SyncCoordinator {
           if ((parsed.ctype !== expectedType || !parsed.recognized) &&
               this.scoreTermPageAttempts < SCORE_TERM_DISCOVERY_MAX_ATTEMPTS) {
             this.scoreTermParsing = false;
-            setTimeout(() => {
+            this.scheduleDeferred(() => {
               if (this.status.running &&
                   (this.status.phase === SyncPhase.DISCOVERING_SCORE_TERMS ||
                    this.status.phase === SyncPhase.LOADING_SCORE_TERM)) {
@@ -725,10 +741,33 @@ export class SyncCoordinator {
     this.scoreTermPageAttempts = 0;
     if (this.scoreTypeIndex < SCORE_TYPES.length) {
       this.transition(SyncPhase.LOADING_SCORE_TERM, '正在同步本学期成绩');
-      this.controller.loadUrl(SCORE_BASE_URL + SCORE_TYPES[this.scoreTypeIndex]);
+      this.openCurrentScorePage();
       return;
     }
     this.finishAggregateScorePages();
+  }
+
+  private openCurrentScorePage(): void {
+    const termCode: string = this.semester.termCode;
+    if (termCode.length === 0 || termCode === 'UNKNOWN_TERM') {
+      this.controller.loadUrl(SCORE_BASE_URL + 'lr');
+      return;
+    }
+    this.controller.runJavaScript(
+      SyncCoordinator.buildTermSwitchScriptForTesting(termCode, 'lr')
+    ).then((result: string) => {
+      if (!SyncCoordinator.didTermSwitchSucceed(result)) {
+        this.controller.loadUrl(
+          SCORE_BASE_URL + 'lr&zxjxjhh=' + encodeURIComponent(termCode)
+        );
+      } else if (SyncCoordinator.isTermReadyWithoutReload(result)) {
+        this.parseAggregateScorePage();
+      }
+    }).catch(() => {
+      this.controller.loadUrl(
+        SCORE_BASE_URL + 'lr&zxjxjhh=' + encodeURIComponent(termCode)
+      );
+    });
   }
 
   private isRedundantCurrentGradePage(expectedType: string): boolean {
@@ -817,7 +856,7 @@ export class SyncCoordinator {
           this.pendingTerms.length,
           this.scoreTermDiscoveryStableObservations
         )) {
-          setTimeout(() => {
+          this.scheduleDeferred(() => {
             if (this.status.running && this.status.phase === SyncPhase.DISCOVERING_SCORE_TERMS) {
               this.discoverScoreTerms();
             }
@@ -825,6 +864,13 @@ export class SyncCoordinator {
           return;
         }
         this.allGradeTermCount = this.pendingTerms.length;
+        if (SyncCoordinator.shouldReloadEmptyScoreTermDiscovery(
+          this.scoreTermDiscoveryReloads,
+          this.allGradeTermCount
+        )) {
+          this.reloadScoreTermDiscoveryPage();
+          return;
+        }
         this.grades = [];
         this.restoreGradeCheckpoint();
         this.status.gradeTotalTerms = this.allGradeTermCount;
@@ -845,16 +891,32 @@ export class SyncCoordinator {
           0,
           this.scoreTermDiscoveryStableObservations
         )) {
-          setTimeout(() => {
+          this.scheduleDeferred(() => {
             if (this.status.running && this.status.phase === SyncPhase.DISCOVERING_SCORE_TERMS) {
               this.discoverScoreTerms();
             }
           }, SCORE_TERM_DISCOVERY_RETRY_DELAY_MS);
           return;
         }
+        if (SyncCoordinator.shouldReloadEmptyScoreTermDiscovery(
+          this.scoreTermDiscoveryReloads,
+          0
+        )) {
+          this.reloadScoreTermDiscoveryPage();
+          return;
+        }
         this.addError('历史学期页面脚本执行失败');
         this.validateAndCommit();
       });
+  }
+
+  private reloadScoreTermDiscoveryPage(): void {
+    this.scoreTermDiscoveryReloads++;
+    this.scoreTermDiscoveryAttempts = 0;
+    this.scoreTermDiscoverySignature = '';
+    this.scoreTermDiscoveryStableObservations = 0;
+    this.transition(SyncPhase.DISCOVERING_SCORE_TERMS, '正在重新加载历史成绩学期');
+    this.controller.loadUrl(SCORE_BASE_URL + 'ln');
   }
 
   static shouldRetryScoreTermDiscovery(
@@ -864,6 +926,10 @@ export class SyncCoordinator {
   ): boolean {
     return attempts < SCORE_TERM_DISCOVERY_MAX_ATTEMPTS &&
       (termCount === 0 || stableObservations < 2);
+  }
+
+  static shouldReloadEmptyScoreTermDiscovery(reloadCount: number, termCount: number): boolean {
+    return termCount === 0 && reloadCount < 1;
   }
 
   static shouldRejectEmptyGradeAggregate(
@@ -884,9 +950,21 @@ export class SyncCoordinator {
     return SCORE_TYPES.map((ctype: string): string => SCORE_BASE_URL + ctype).join('|');
   }
 
+  static isAggregateGradePhase(phase: SyncPhase): boolean {
+    return phase === SyncPhase.DISCOVERING_SCORE_TERMS ||
+      phase === SyncPhase.LOADING_SCORE_TERM;
+  }
+
+  static isHistoricalGradeTermPhase(fullGradeSync: boolean, scoreTypeIndex: number): boolean {
+    return fullGradeSync && scoreTypeIndex === 0;
+  }
+
   private loadNextScoreTerm(): void {
     if (this.currentTermIndex >= this.pendingTerms.length) {
-      this.validateAndCommit();
+      this.scoreTypeIndex = 1;
+      this.scoreTermPageAttempts = 0;
+      this.transition(SyncPhase.LOADING_SCORE_TERM, '正在同步本学期成绩');
+      this.openCurrentScorePage();
       return;
     }
     const term: GradeTermOption = this.pendingTerms[this.currentTermIndex];
@@ -943,7 +1021,7 @@ export class SyncCoordinator {
             pageMatchesTerm
           )) {
             this.scoreTermParsing = false;
-            setTimeout(() => {
+            this.scheduleDeferred(() => {
               if (this.status.running && this.status.phase === SyncPhase.LOADING_SCORE_TERM) {
                 this.parseCurrentScoreTerm();
               }
@@ -1280,6 +1358,24 @@ export class SyncCoordinator {
     }
   }
 
+  private scheduleDeferred(callback: () => void, delayMs: number): void {
+    let timeoutId: number = -1;
+    timeoutId = setTimeout(() => {
+      this.deferredTimeoutIds =
+        this.deferredTimeoutIds.filter((item: number): boolean => item !== timeoutId);
+      callback();
+    }, delayMs);
+    this.deferredTimeoutIds.push(timeoutId);
+  }
+
+  private cancelAllTimeouts(): void {
+    this.cancelTimeout();
+    for (let i = 0; i < this.deferredTimeoutIds.length; i++) {
+      clearTimeout(this.deferredTimeoutIds[i]);
+    }
+    this.deferredTimeoutIds = [];
+  }
+
   private failTerminal(phase: SyncPhase, reason: string): void {
     if (!this.status.running && phase !== SyncPhase.CANCELLED) {
       return;
@@ -1292,7 +1388,7 @@ export class SyncCoordinator {
   }
 
   private finish(): void {
-    this.cancelTimeout();
+    this.cancelAllTimeouts();
     const now: number = Date.now();
     this.status.phaseEndedAt = now;
     if (this.status.traces.length > 0 &&
@@ -1419,13 +1515,15 @@ export class SyncCoordinator {
     this.timetableTermResolved = this.courses.length > 0;
   }
 
-  static buildTermSwitchScriptForTesting(termCode: string): string {
+  static buildTermSwitchScriptForTesting(termCode: string, scoreType: string = 'ln'): string {
     const encoded: string = JSON.stringify(termCode);
+    const encodedScoreType: string = JSON.stringify(scoreType);
     return `
 (function() {
-  var sel = document.querySelector('select[name="zxjxjhh"], select#zxjxjhh');
+  var sel = findTermSelect();
   if (!sel) return JSON.stringify({changed:false,ready:false});
   var target = ${encoded};
+  var scoreType = ${encodedScoreType};
   for (var i = 0; i < sel.options.length; i++) {
     if (sel.options[i].value === target) {
       sel.value = target;
@@ -1439,7 +1537,7 @@ export class SyncCoordinator {
           ctypeInput.name = 'ctype';
           form.appendChild(ctypeInput);
         }
-        ctypeInput.value = 'ln';
+        ctypeInput.value = scoreType;
         var submitter = form.querySelector(
           'button[type="submit"], input[type="submit"], button:not([type])'
         );
@@ -1459,6 +1557,31 @@ export class SyncCoordinator {
   }
 
   return JSON.stringify({changed:false,ready:false});
+
+  function findTermSelect(){
+    var preferred = document.querySelector(
+      'select[name="zxjxjhh"], select#zxjxjhh, select[name*="xnxq"], select[id*="xnxq"]'
+    );
+    if(preferred) return preferred;
+    var candidates = document.querySelectorAll('select');
+    var best = null, bestScore = 0;
+    for(var s=0; s<candidates.length; s++){
+      var score = 0;
+      var identity = ((candidates[s].name || '') + ' ' + (candidates[s].id || '')).toLowerCase();
+      if(/term|semester|xnxq|xq|jxjh/.test(identity)) score += 4;
+      for(var j=0; j<candidates[s].options.length; j++){
+        var optionText = ((candidates[s].options[j].textContent || '') + ' ' +
+          (candidates[s].options[j].value || '')).trim();
+        if(/20\\d{2}\\s*[-—–~至]\\s*20\\d{2}/.test(optionText)) score += 3;
+        if(/(?:[-_]\\s*[12]\\b|第[一二12]学期|春|秋)/.test(optionText)) score += 1;
+      }
+      if(score > bestScore){
+        best = candidates[s];
+        bestScore = score;
+      }
+    }
+    return bestScore >= 3 ? best : null;
+  }
 })();
 `;
   }

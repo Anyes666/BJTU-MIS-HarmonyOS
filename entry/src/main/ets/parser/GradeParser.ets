@@ -88,7 +88,7 @@ export class GradeParser {
   static buildListTermsScript(): string {
     return `
 (function(){
-  var sel = document.querySelector('select[name="zxjxjhh"], select#zxjxjhh');
+  var sel = findTermSelect();
   if(!sel) return JSON.stringify([]);
   var opts = [];
   for(var i=0; i<sel.options.length; i++){
@@ -96,6 +96,31 @@ export class GradeParser {
     opts.push({termCode: o.value||'', termLabel: (o.textContent||'').trim(), selected: o.selected});
   }
   return JSON.stringify(opts);
+
+  function findTermSelect(){
+    var preferred = document.querySelector(
+      'select[name="zxjxjhh"], select#zxjxjhh, select[name*="xnxq"], select[id*="xnxq"]'
+    );
+    if(preferred) return preferred;
+    var candidates = document.querySelectorAll('select');
+    var best = null, bestScore = 0;
+    for(var s=0; s<candidates.length; s++){
+      var score = 0;
+      var identity = ((candidates[s].name || '') + ' ' + (candidates[s].id || '')).toLowerCase();
+      if(/term|semester|xnxq|xq|jxjh/.test(identity)) score += 4;
+      for(var j=0; j<candidates[s].options.length; j++){
+        var optionText = ((candidates[s].options[j].textContent || '') + ' ' +
+          (candidates[s].options[j].value || '')).trim();
+        if(/20\\d{2}\\s*[-—–~至]\\s*20\\d{2}/.test(optionText)) score += 3;
+        if(/(?:[-_]\\s*[12]\\b|第[一二12]学期|春|秋)/.test(optionText)) score += 1;
+      }
+      if(score > bestScore){
+        best = candidates[s];
+        bestScore = score;
+      }
+    }
+    return bestScore >= 3 ? best : null;
+  }
 })();
 `;
   }
@@ -103,7 +128,7 @@ export class GradeParser {
   static buildExtractScript(): string {
     return `
 (function(){
-  var sel = document.querySelector('select[name="zxjxjhh"], select#zxjxjhh');
+  var sel = findTermSelect();
   var termCode = '', termLabel = '';
   var ctype = '';
   try {
@@ -227,6 +252,31 @@ export class GradeParser {
     collegeRanking: collegeRanking,
     recognized: recognized
   });
+
+  function findTermSelect(){
+    var preferred = document.querySelector(
+      'select[name="zxjxjhh"], select#zxjxjhh, select[name*="xnxq"], select[id*="xnxq"]'
+    );
+    if(preferred) return preferred;
+    var candidates = document.querySelectorAll('select');
+    var best = null, bestScore = 0;
+    for(var s=0; s<candidates.length; s++){
+      var score = 0;
+      var identity = ((candidates[s].name || '') + ' ' + (candidates[s].id || '')).toLowerCase();
+      if(/term|semester|xnxq|xq|jxjh/.test(identity)) score += 4;
+      for(var j=0; j<candidates[s].options.length; j++){
+        var optionText = ((candidates[s].options[j].textContent || '') + ' ' +
+          (candidates[s].options[j].value || '')).trim();
+        if(/20\\d{2}\\s*[-—–~至]\\s*20\\d{2}/.test(optionText)) score += 3;
+        if(/(?:[-_]\\s*[12]\\b|第[一二12]学期|春|秋)/.test(optionText)) score += 1;
+      }
+      if(score > bestScore){
+        best = candidates[s];
+        bestScore = score;
+      }
+    }
+    return bestScore >= 3 ? best : null;
+  }
 
   function extractCollegeRanking(){
     var nodes = document.querySelectorAll('tr, .form-group, .control-group, .row');

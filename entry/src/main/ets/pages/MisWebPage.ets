@@ -39,6 +39,8 @@ struct MisWebPage {
       (status: SyncStatus): void => {
         if (status.phase === SyncPhase.COMPLETED || status.phase === SyncPhase.PARTIAL_SUCCESS) {
           this.persistWebSession();
+          const revision: number = AppStorage.get<number>('dataRevision') ?? 0;
+          AppStorage.setOrCreate('dataRevision', revision + 1);
           promptAction.showToast({
             message: status.phase === SyncPhase.COMPLETED ? '同步完成' : '同步部分完成，旧数据已保留'
           });

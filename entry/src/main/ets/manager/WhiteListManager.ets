@@ -18,6 +18,9 @@ const INITIAL_WHITELIST: Array<string> = [
   'open.work.weixin.qq.com'
 ];
 
+const PORT_PATTERN: RegExp = /^\d+$/;
+const HOST_PATTERN: RegExp = /^[a-z0-9.-]+$/;
+
 const AUTH_PAGE_PATTERNS: Array<string> = [
   'login',
   'auth',
@@ -182,11 +185,11 @@ export class WhiteListManager {
     const colonIndex: number = authority.lastIndexOf(':');
     if (colonIndex >= 0) {
       const port: string = authority.substring(colonIndex + 1);
-      if (port.length === 0 || !new RegExp('^\\d+$').test(port)) {
+      if (port.length === 0 || !PORT_PATTERN.test(port)) {
         return '';
       }
       authority = authority.substring(0, colonIndex);
     }
-    return new RegExp('^[a-z0-9.-]+$').test(authority) ? authority : '';
+    return HOST_PATTERN.test(authority) ? authority : '';
   }
 }

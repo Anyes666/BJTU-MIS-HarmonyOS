@@ -88,6 +88,54 @@ export default function parserTest(): void {
       expect(CourseInfo.filterByTerm([historical, current], 'UNKNOWN_TERM').length).assertEqual(0);
     });
 
+    it('currentTermFilterNormalizesOfficialTermVariants', 0, () => {
+      const current: CourseInfo = new CourseInfo();
+      current.termCode = '2025-2026-02';
+      current.termLabel = '2025-2026 学年第二学期';
+      const historical: CourseInfo = new CourseInfo();
+      historical.termCode = '2025-2026-1';
+      const filtered: Array<CourseInfo> = CourseInfo.filterByTerm(
+        [historical, current],
+        '2025—2026-2',
+        '2025-2026 学年第二学期'
+      );
+      expect(filtered.length).assertEqual(1);
+      expect(filtered[0].termCode).assertEqual('2025-2026-02');
+    });
+
+    it('currentTermFilterUsesUnambiguousCurrentTimetableCache', 0, () => {
+      const first: CourseInfo = new CourseInfo(); first.termCode = 'opaque-current';
+      const second: CourseInfo = new CourseInfo(); second.termCode = 'opaque-current';
+      expect(CourseInfo.filterByTerm(
+        [first, second],
+        '2025-2026-2'
+      ).length).assertEqual(2);
+    });
+
+    it('currentTermFilterUsesNewestOfficialTimetableSnapshot', 0, () => {
+      const historical: CourseInfo = new CourseInfo();
+      historical.termCode = '2025-2026-1';
+      historical.syncedAt = 100;
+      const current: CourseInfo = new CourseInfo();
+      current.termCode = 'opaque-current';
+      current.syncedAt = 200;
+      const filtered: Array<CourseInfo> = CourseInfo.filterByTerm(
+        [historical, current],
+        'UNKNOWN_TERM'
+      );
+      expect(filtered.length).assertEqual(1);
+      expect(filtered[0].termCode).assertEqual('opaque-current');
+    });
+
+    it('currentTermFilterKeepsSingleUnknownLegacySnapshot', 0, () => {
+      const course: CourseInfo = new CourseInfo();
+      course.termCode = 'UNKNOWN_TERM';
+      expect(CourseInfo.filterByTerm(
+        [course],
+        'UNKNOWN_TERM'
+      ).length).assertEqual(1);
+    });
+
     it('parsesContinuousAndNineToSixteenWeeks', 0, () => {
       const full: ParsedWeekInfo = CourseParser.parseWeeksText('第01-16周');
       const late: ParsedWeekInfo = CourseParser.parseWeeksText('9-16周');
@@ -386,7 +434,9 @@ export default function parserTest(): void {
       const source: string = SyncCoordinator.buildTermSwitchScriptForTesting('T1');
       expect(source.includes('sel.onchange(changed)')).assertFalse();
       expect(source.includes("window.jQuery(sel).trigger('change')")).assertFalse();
-      expect(source.includes("ctypeInput.value = 'ln'")).assertTrue();
+      expect(source.includes("document.querySelectorAll('select')")).assertTrue();
+      expect(source.includes('var scoreType = "ln"')).assertTrue();
+      expect(source.includes('ctypeInput.value = scoreType')).assertTrue();
       expect(source.includes('form.requestSubmit(submitter)')).assertTrue();
       expect(source.includes('sel.value === target && sel.selectedIndex === i')).assertFalse();
       expect(SyncCoordinator.didTermSwitchSucceed('{"changed":true}')).assertTrue();
@@ -395,6 +445,8 @@ export default function parserTest(): void {
       expect(SyncCoordinator.didTermSwitchSucceed('not-json')).assertFalse();
       expect(SyncCoordinator.isTermReadyWithoutReload('{"changed":true,"ready":true}')).assertTrue();
       expect(SyncCoordinator.isTermReadyWithoutReload('{"changed":true,"ready":false}')).assertFalse();
+      expect(SyncCoordinator.buildTermSwitchScriptForTesting('T2', 'lr')
+        .includes('var scoreType = "lr"')).assertTrue();
       const parsedHistory: GradeParseResult = GradeParser.parseResult(
         '{"recognized":true,"termCode":"T1","ctype":"ln","grades":[]}',
         'https://aa.bjtu.edu.cn/score/scores/stu/view/?ctype=ln'
@@ -472,7 +524,18 @@ export default function parserTest(): void {
       const source: string = SyncCoordinator.gradeListContractForTesting();
       expect(source.includes('page=1&perpage=500&ctype=ln')).assertTrue();
       expect(source.includes('page=1&perpage=500&ctype=lr')).assertTrue();
+      expect(SyncCoordinator.isAggregateGradePhase(SyncPhase.DISCOVERING_SCORE_TERMS)).assertTrue();
+      expect(SyncCoordinator.isAggregateGradePhase(SyncPhase.LOADING_SCORE_TERM)).assertTrue();
+      expect(SyncCoordinator.isAggregateGradePhase(SyncPhase.LOADING_TIMETABLE)).assertFalse();
+      expect(SyncCoordinator.isHistoricalGradeTermPhase(true, 0)).assertTrue();
+      expect(SyncCoordinator.isHistoricalGradeTermPhase(true, 1)).assertFalse();
+      expect(SyncCoordinator.isHistoricalGradeTermPhase(false, 0)).assertFalse();
+      expect(SyncCoordinator.shouldReloadEmptyScoreTermDiscovery(0, 0)).assertTrue();
+      expect(SyncCoordinator.shouldReloadEmptyScoreTermDiscovery(1, 0)).assertFalse();
+      expect(SyncCoordinator.shouldReloadEmptyScoreTermDiscovery(0, 2)).assertFalse();
       const script: string = GradeParser.buildExtractScript();
+      expect(GradeParser.buildListTermsScript().includes("document.querySelectorAll('select')")).assertTrue();
+      expect(script.includes("document.querySelectorAll('select')")).assertTrue();
       expect(script.includes("ctype === 'ln' || ctype === 'lr'")).assertTrue();
       expect(script.includes('colMap.term = 1')).assertTrue();
       expect(script.includes('colMap.name = 2')).assertTrue();

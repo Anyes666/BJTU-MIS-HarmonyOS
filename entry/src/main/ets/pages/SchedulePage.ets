@@ -9,6 +9,8 @@ import { AcademicCalendar, AcademicWeekRange } from '../model/AcademicCalendar';
 
 @Component
 export struct ScheduleView {
+  @Watch('onDataRevisionChanged') @Prop dataRevision: number = 0;
+  @Watch('onActiveChanged') @Prop isActive: boolean = false;
   @State currentView: number = 0;
   @State courses: Array<CourseInfo> = [];
   @State syncState: SyncState = new SyncState();
@@ -21,10 +23,25 @@ export struct ScheduleView {
     this.loadData();
   }
 
+  private onDataRevisionChanged(): void {
+    this.loadData();
+  }
+
+  private onActiveChanged(): void {
+    if (this.isActive) {
+      this.loadData();
+    }
+  }
+
   loadData(): void {
+    this.dataStore.resolveUnknownCourseTerms();
     this.syncState = this.dataStore.loadSyncState();
     this.semester = this.dataStore.loadSemester();
-    this.courses = CourseInfo.filterByTerm(this.dataStore.loadCourses(), this.semester.termCode);
+    this.courses = CourseInfo.filterByTerm(
+      this.dataStore.loadCourses(),
+      this.semester.termCode,
+      this.semester.termLabel
+    );
     const currentWeek: number = this.effectiveCurrentWeek();
     this.selectedWeek = this.clampWeek(currentWeek > 0 ? currentWeek : 1);
   }

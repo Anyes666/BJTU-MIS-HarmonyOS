@@ -8,13 +8,24 @@ import { webview } from '@kit.ArkWeb';
 
 @Component
 export struct SettingsView {
+  @Watch('onDataRevisionChanged') @Prop dataRevision: number = 0;
+  @Watch('onActiveChanged') @Prop isActive: boolean = false;
   @StorageLink('loginState') loginState: LoginState = LoginState.UNKNOWN;
   @State syncState: SyncState = new SyncState();
   private dataStore: CourseDataStore = CourseDataStore.getInstance();
-  private whiteListMgr: WhiteListManager = WhiteListManager.getInstance();
 
   aboutToAppear(): void {
     this.refresh();
+  }
+
+  private onDataRevisionChanged(): void {
+    this.refresh();
+  }
+
+  private onActiveChanged(): void {
+    if (this.isActive) {
+      this.refresh();
+    }
   }
 
   refresh(): void { this.syncState = this.dataStore.loadSyncState(); }
@@ -95,15 +106,16 @@ export struct SettingsView {
   }
 
   private showReloginConfirm(): void {
+    const pageRouter = this.getUIContext().getRouter();
     promptAction.showDialog({
       title: '重新登录', message: '将清除当前网页登录会话，本地校园数据保持不变。',
       buttons: [{ text: '取消', color: '#007AFF' }, { text: '继续', color: '#FF3B30' }]
     }).then((r: Object) => {
       if (((r as Record<string,Object>)['index'] as number ?? -1) === 1) {
         webview.WebCookieManager.clearAllCookiesSync();
-        this.loginState = LoginState.NOT_LOGGED_IN;
-        this.whiteListMgr.reset();
-        this.getUIContext().getRouter().pushUrl({ url: 'pages/MisWebPage' });
+        AppStorage.setOrCreate('loginState', LoginState.NOT_LOGGED_IN);
+        WhiteListManager.getInstance().reset();
+        pageRouter.pushUrl({ url: 'pages/MisWebPage' });
       }
     });
   }

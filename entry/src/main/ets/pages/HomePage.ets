@@ -29,6 +29,7 @@ interface HomeWebResourceRequest {
 @Component
 struct HomePage {
   @State currentTabIndex: number = 0;
+  @Watch('onDataRevisionChanged') @StorageLink('dataRevision') dataRevision: number = 0;
   @StorageLink('loginState') loginState: LoginState = LoginState.UNKNOWN;
   @State syncState: SyncState = new SyncState();
   @State courses: Array<CourseInfo> = [];
@@ -52,10 +53,20 @@ struct HomePage {
   }
 
   onPageShow(): void { this.loadData(); }
+  aboutToDisappear(): void {
+    this.stopBackgroundRefresh();
+    this.persistWebSession();
+  }
+  private onDataRevisionChanged(): void { this.loadData(); }
   loadData(): void {
+    this.dataStore.resolveUnknownCourseTerms();
     this.syncState = this.dataStore.loadSyncState();
     this.semester = this.dataStore.loadSemester();
-    this.courses = CourseInfo.filterByTerm(this.dataStore.loadCourses(), this.semester.termCode);
+    this.courses = CourseInfo.filterByTerm(
+      this.dataStore.loadCourses(),
+      this.semester.termCode,
+      this.semester.termLabel
+    );
     this.exams = this.dataStore.loadExams();
     this.grades = this.dataStore.loadGrades();
     this.changes = this.dataStore.loadChangeEvents();
@@ -65,10 +76,18 @@ struct HomePage {
     Stack() {
       Tabs({ barPosition: BarPosition.End, controller: this.tabsController }) {
         TabContent() { this.HomeContentView() }.tabBar(this.TabBarBuilder('首页', 0))
-        TabContent() { ScheduleView() }.tabBar(this.TabBarBuilder('课表', 1))
-        TabContent() { ExamView() }.tabBar(this.TabBarBuilder('考试', 2))
-        TabContent() { GradeView() }.tabBar(this.TabBarBuilder('成绩', 3))
-        TabContent() { SettingsView() }.tabBar(this.TabBarBuilder('设置', 4))
+        TabContent() {
+          ScheduleView({ dataRevision: this.dataRevision, isActive: this.currentTabIndex === 1 })
+        }.tabBar(this.TabBarBuilder('课表', 1))
+        TabContent() {
+          ExamView({ dataRevision: this.dataRevision, isActive: this.currentTabIndex === 2 })
+        }.tabBar(this.TabBarBuilder('考试', 2))
+        TabContent() {
+          GradeView({ dataRevision: this.dataRevision, isActive: this.currentTabIndex === 3 })
+        }.tabBar(this.TabBarBuilder('成绩', 3))
+        TabContent() {
+          SettingsView({ dataRevision: this.dataRevision, isActive: this.currentTabIndex === 4 })
+        }.tabBar(this.TabBarBuilder('设置', 4))
       }
       .barWidth('100%').barHeight(56)
       .onChange((index: number) => { this.currentTabIndex = index; })
@@ -387,9 +406,11 @@ struct HomePage {
         if (status.phase === SyncPhase.COMPLETED || status.phase === SyncPhase.PARTIAL_SUCCESS) {
           this.persistWebSession();
           this.loadData();
+          AppStorage.setOrCreate('dataRevision', this.dataRevision + 1);
         }
         if (status.phase !== SyncPhase.WAITING_FOR_LOGIN) {
           this.backgroundRefreshActive = false;
+          this.backgroundCoordinator = undefined;
         }
       }
     );
@@ -402,6 +423,7 @@ struct HomePage {
       this.backgroundCoordinator.cancel();
     }
     this.backgroundRefreshActive = false;
+    this.backgroundCoordinator = undefined;
   }
 
   private persistWebSession(): void {

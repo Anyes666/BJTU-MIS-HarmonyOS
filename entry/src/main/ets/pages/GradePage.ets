@@ -10,12 +10,28 @@ class GradeTermFilter {
 
 @Component
 export struct GradeView {
+  @Watch('onDataRevisionChanged') @Prop dataRevision: number = 0;
+  @Watch('onActiveChanged') @Prop isActive: boolean = false;
   @State grades: Array<GradeInfo> = [];
   @State gradeTerms: Array<GradeTermOption> = [];
   @State selectedTermCode: string = '';
   private dataStore: CourseDataStore = CourseDataStore.getInstance();
 
   aboutToAppear(): void {
+    this.loadData();
+  }
+
+  private onDataRevisionChanged(): void {
+    this.loadData();
+  }
+
+  private onActiveChanged(): void {
+    if (this.isActive) {
+      this.loadData();
+    }
+  }
+
+  private loadData(): void {
     this.grades = this.dataStore.loadGrades();
     this.gradeTerms = this.dataStore.loadGradeTerms();
     const terms: Array<GradeTermFilter> = this.termFilters();

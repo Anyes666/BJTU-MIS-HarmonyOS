@@ -12,12 +12,28 @@ class ExamTermFilter {
 
 @Component
 export struct ExamView {
+  @Watch('onDataRevisionChanged') @Prop dataRevision: number = 0;
+  @Watch('onActiveChanged') @Prop isActive: boolean = false;
   @State exams: Array<ExamInfo> = [];
   @State syncState: SyncState = new SyncState();
   @State selectedTermCode: string = '';
   private dataStore: CourseDataStore = CourseDataStore.getInstance();
 
   aboutToAppear(): void {
+    this.loadData();
+  }
+
+  private onDataRevisionChanged(): void {
+    this.loadData();
+  }
+
+  private onActiveChanged(): void {
+    if (this.isActive) {
+      this.loadData();
+    }
+  }
+
+  private loadData(): void {
     this.exams = this.dataStore.loadExams();
     this.syncState = this.dataStore.loadSyncState();
     const terms: Array<ExamTermFilter> = this.termFilters();

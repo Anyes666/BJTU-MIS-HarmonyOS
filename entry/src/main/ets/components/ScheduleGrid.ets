@@ -52,7 +52,7 @@ export struct ScheduleGrid {
           ForEach(this.getCoursesStartingAt(dayIndex + 1, period), (course: CourseInfo) => {
             Column() {
               Text(course.name).fontSize(this.getCoursesStartingAt(dayIndex + 1, period).length > 1 ? 8 : 10)
-                .fontWeight(FontWeight.Medium).fontColor('#FFFFFF')
+                .fontWeight(FontWeight.Medium).fontColor(Theme.onPrimary())
                 .width('100%')
                 .maxLines(this.getCoursesStartingAt(dayIndex + 1, period).length > 1 ? 2 : 3)
                 .textAlign(TextAlign.Start)
@@ -60,7 +60,7 @@ export struct ScheduleGrid {
               if (this.getCoursesStartingAt(dayIndex + 1, period).length === 1 &&
                   this.getLocationAt(course, dayIndex + 1, period).length > 0) {
                 Text(this.getLocationAt(course, dayIndex + 1, period))
-                  .fontSize(8).fontColor('#FFFFFFCC').width('100%').maxLines(1)
+                  .fontSize(8).fontColor(Theme.onPrimary()).opacity(0.8).width('100%').maxLines(1)
                   .textAlign(TextAlign.Start)
                   .textOverflow({ overflow: TextOverflow.Ellipsis }).margin({ top: 3 })
               }

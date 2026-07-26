@@ -5,11 +5,16 @@ import { Theme } from '../common/Theme';
 @Entry({ routeName: 'SyncCenterPage' })
 @Component
 struct SyncCenterPage {
+  @Watch('onDataRevisionChanged') @StorageLink('dataRevision') dataRevision: number = 0;
   @State records: Array<ModuleSyncRecord> = [];
   @State changes: Array<ChangeEvent> = [];
   private dataStore: CourseDataStore = CourseDataStore.getInstance();
 
   aboutToAppear(): void {
+    this.reload();
+  }
+
+  private onDataRevisionChanged(): void {
     this.reload();
   }
 
