@@ -16,6 +16,10 @@ export default function securityTest(): void {
       expect(manager.isAllowed('https://mis.bjtu.edu.cn:443/')).assertTrue();
       expect(manager.isAllowed('https://mis.bjtu.edu.cn?source=app')).assertTrue();
       expect(manager.isAllowed('https://mail.bjtu.edu.cn/')).assertTrue();
+      expect(manager.isAllowed('https://open.work.weixin.qq.com/')).assertTrue();
+      expect(manager.isAuthPage('https://open.work.weixin.qq.com/wwopen/sso/qrConnect')).assertTrue();
+      expect(manager.canExtractData('https://open.work.weixin.qq.com/wwopen/sso/qrConnect')).assertFalse();
+      expect(manager.isAllowed('https://open.work.weixin.qq.com.evil.example/')).assertFalse();
       expect(manager.isAllowed('https://mail.bjtu.edu.cn.evil.example/')).assertFalse();
       expect(manager.isAllowed('https://mis.bjtu.edu.cn.evil.example/')).assertFalse();
       expect(manager.isAllowed('https://mis.bjtu.edu.cn:443@evil.example/')).assertFalse();

@@ -14,7 +14,8 @@ const INITIAL_WHITELIST: Array<string> = [
   'bksy.bjtu.edu.cn',
   'gmis.bjtu.edu.cn',
   'zhjw.bjtu.edu.cn',
-  'jw.bjtu.edu.cn'
+  'jw.bjtu.edu.cn',
+  'open.work.weixin.qq.com'
 ];
 
 const AUTH_PAGE_PATTERNS: Array<string> = [
@@ -76,7 +77,8 @@ export class WhiteListManager {
   isAuthPage(url: string): boolean {
     const host: string = this.extractDomain(url);
     if (host === 'cas.bjtu.edu.cn' || host === 'ids.bjtu.edu.cn' ||
-        host === 'auth.bjtu.edu.cn' || host === 'sso.bjtu.edu.cn') {
+        host === 'auth.bjtu.edu.cn' || host === 'sso.bjtu.edu.cn' ||
+        host === 'open.work.weixin.qq.com') {
       return true;
     }
     for (let i = 0; i < AUTH_PAGE_PATTERNS.length; i++) {
@@ -112,6 +114,10 @@ export class WhiteListManager {
 
   getObservedDomains(): Array<string> {
     return this.observedDomains.slice(0);
+  }
+
+  displayDomain(url: string): string {
+    return this.extractDomain(url);
   }
 
   confirmDomain(domain: string): void {

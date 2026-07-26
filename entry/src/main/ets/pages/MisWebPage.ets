@@ -114,7 +114,11 @@ struct MisWebPage {
             }
             this.currentUrl = url;
             if (!this.whiteListManager.isAllowed(url)) {
-              promptAction.showToast({ message: '已阻止未知域名' });
+              const blockedDomain: string = this.whiteListManager.displayDomain(url);
+              promptAction.showToast({
+                message: blockedDomain.length > 0 ?
+                  '已阻止未知域名：' + blockedDomain : '已阻止非 HTTPS 页面'
+              });
               return true;
             }
             return false;

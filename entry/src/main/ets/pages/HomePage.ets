@@ -36,7 +36,6 @@ struct HomePage {
   @State grades: Array<GradeInfo> = [];
   @State changes: Array<ChangeEvent> = [];
   @State semester: SemesterInfo = new SemesterInfo();
-  private initialLoginOpened: boolean = false;
   @State backgroundRefreshActive: boolean = false;
   private backgroundController: webview.WebviewController = new webview.WebviewController();
   private backgroundCoordinator: SyncCoordinator | undefined = undefined;
@@ -47,12 +46,7 @@ struct HomePage {
   aboutToAppear(): void {
     this.dataStore.init(getContext(this) as common.UIAbilityContext);
     this.loadData();
-    if (!this.hasLocalData() && !this.initialLoginOpened) {
-      this.initialLoginOpened = true;
-      setTimeout(() => {
-        this.getUIContext().getRouter().pushUrl({ url: 'pages/MisWebPage' });
-      }, 300);
-    } else if (this.dataStore.shouldAutoRefresh()) {
+    if (this.hasLocalData() && this.dataStore.shouldAutoRefresh()) {
       this.startBackgroundRefresh();
     }
   }
@@ -132,12 +126,87 @@ struct HomePage {
   @Builder HomeContentView(): void {
     Scroll() {
       Column() {
-        this.StatusCard()
-        this.OverviewCard()
-        this.RecentChangesCard()
-        this.QuickActions()
+        if (this.hasLocalData()) {
+          this.StatusCard()
+          this.OverviewCard()
+          this.RecentChangesCard()
+          this.QuickActions()
+        } else {
+          this.FirstRunCard()
+        }
       }.width('100%').alignItems(HorizontalAlign.Center).padding({ left: 16, right: 16 })
     }.width('100%').height('100%')
+  }
+
+  @Builder
+  FirstRunCard(): void {
+    Column() {
+      Text('北京交通大学')
+        .fontSize(12)
+        .fontColor(Theme.textSecondary())
+      Text('欢迎使用 MIS 助手')
+        .fontSize(26)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(Theme.textPrimary())
+        .margin({ top: 6 })
+      Text('登录学校官方页面后，课表、考试和成绩会自动同步到本机。')
+        .fontSize(14)
+        .fontColor(Theme.textSecondary())
+        .lineHeight(22)
+        .textAlign(TextAlign.Center)
+        .margin({ top: 14 })
+      Column({ space: 10 }) {
+        this.FirstRunFeature('官方页面登录', '账号信息仅提交给学校系统')
+        this.FirstRunFeature('自动同步', '完成后自动返回应用首页')
+        this.FirstRunFeature('离线可用', '已同步数据只保存在本机')
+      }
+      .width('100%')
+      .margin({ top: 24, bottom: 26 })
+      Button('登录并同步')
+        .width('100%')
+        .height(48)
+        .fontSize(16)
+        .fontWeight(FontWeight.Medium)
+        .fontColor(Theme.onPrimary())
+        .backgroundColor(Theme.primary())
+        .borderRadius(14)
+        .onClick(() => {
+          this.getUIContext().getRouter().pushUrl({ url: 'pages/MisWebPage' });
+        })
+      Text('进入前不会自动连接或同步学校数据')
+        .fontSize(11)
+        .fontColor(Theme.textDisabled())
+        .margin({ top: 14 })
+    }
+    .width('100%')
+    .padding(22)
+    .borderRadius(18)
+    .backgroundColor(Theme.surface())
+    .margin({ top: 72 })
+    .alignItems(HorizontalAlign.Center)
+  }
+
+  @Builder
+  FirstRunFeature(title: string, description: string): void {
+    Row() {
+      Text('✓')
+        .fontSize(13)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(Theme.primary())
+        .width(28)
+        .height(28)
+        .textAlign(TextAlign.Center)
+        .borderRadius(14)
+        .backgroundColor(Theme.primaryLight())
+      Column() {
+        Text(title).fontSize(14).fontWeight(FontWeight.Medium).fontColor(Theme.textPrimary())
+        Text(description).fontSize(11).fontColor(Theme.textSecondary()).margin({ top: 2 })
+      }
+      .layoutWeight(1)
+      .alignItems(HorizontalAlign.Start)
+      .margin({ left: 10 })
+    }
+    .width('100%')
   }
 
   @Builder
