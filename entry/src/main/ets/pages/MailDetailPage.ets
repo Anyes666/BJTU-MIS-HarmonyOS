@@ -2,6 +2,7 @@ import { MailDetail, MailSnapshot } from '../model/MailInfo';
 import { MailDetailParams } from '../model/RouteParams';
 import { CourseDataStore } from '../store/CourseDataStore';
 import { Theme } from '../common/Theme';
+import { ThemeContentBoundary, ThemedBackground } from '../components/ThemedBackground';
 
 @Entry({ routeName: 'MailDetailPage' })
 @Component
@@ -20,7 +21,10 @@ struct MailDetailPage {
   }
 
   build() {
-    Column() {
+    Stack({ alignContent: Alignment.TopStart }) {
+      ThemedBackground()
+      ThemeContentBoundary() {
+        Column() {
       Row() {
         Button('返回').fontSize(14).backgroundColor(Color.Transparent).fontColor(Theme.primary())
           .onClick(() => { this.getUIContext().getRouter().back(); })
@@ -45,8 +49,16 @@ struct MailDetailPage {
             .onClick(() => {
               this.getUIContext().getRouter().pushUrl({ url: 'pages/MailOfficialPage' });
             })
-        }.width('100%').padding({ left: 16, right: 16, top: 18 })
+        }
+        .width('calc(100% - 32vp)')
+        .padding(18)
+        .borderRadius(14)
+        .backgroundColor(Theme.surface())
+        .backgroundBlurStyle(Theme.blurStyle())
+        .margin({ left: 16, right: 16, top: 18, bottom: 18 })
       }.layoutWeight(1).width('100%')
-    }.width('100%').height('100%').backgroundColor(Theme.background())
+        }.width('100%').height('100%').backgroundColor(Theme.background())
+      }
+    }.width('100%').height('100%')
   }
 }

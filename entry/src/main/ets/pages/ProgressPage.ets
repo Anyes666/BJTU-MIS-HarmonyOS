@@ -3,6 +3,7 @@ import { GradeInfo } from '../model/GradeInfo';
 import { GradeMetrics } from '../model/GradeMetrics';
 import { CourseDataStore } from '../store/CourseDataStore';
 import { Theme } from '../common/Theme';
+import { ThemeContentBoundary, ThemedBackground } from '../components/ThemedBackground';
 
 @Entry({ routeName: 'ProgressPage' })
 @Component
@@ -17,7 +18,10 @@ struct ProgressPage {
   }
 
   build() {
-    Column() {
+    Stack({ alignContent: Alignment.TopStart }) {
+      ThemedBackground()
+      ThemeContentBoundary() {
+        Column() {
       this.TopBar()
       Scroll() {
         Column() {
@@ -32,6 +36,11 @@ struct ProgressPage {
             '汇总来自学校官方培养页面' : '本地计算，仅供参考；不代表毕业或培养完成结论')
             .fontSize(11)
             .fontColor(this.progress.officialSummary ? Theme.textDisabled() : Theme.warning())
+            .width('100%')
+            .padding(12)
+            .borderRadius(10)
+            .backgroundColor(Theme.card())
+            .backgroundBlurStyle(Theme.blurStyle())
             .margin({ top: 12, bottom: 32 })
         }
         .width('100%')
@@ -39,10 +48,12 @@ struct ProgressPage {
       }
       .layoutWeight(1)
       .width('100%')
-    }
-    .width('100%')
-    .height('100%')
-    .backgroundColor(Theme.background())
+        }
+        .width('100%')
+        .height('100%')
+        .backgroundColor(Theme.background())
+      }
+    }.width('100%').height('100%')
   }
 
   @Builder

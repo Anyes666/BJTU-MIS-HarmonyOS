@@ -7,6 +7,7 @@ import { SyncCoordinator } from '../manager/SyncCoordinator';
 import { Theme } from '../common/Theme';
 import { SyncRequest, SyncTarget } from '../model/CampusInfo';
 import { MisWebParams } from '../model/RouteParams';
+import { ThemeContentBoundary, ThemedBackground } from '../components/ThemedBackground';
 
 const MIS_URL: string = 'https://mis.bjtu.edu.cn/';
 
@@ -90,7 +91,10 @@ struct MisWebPage {
   }
 
   build() {
-    Column() {
+    Stack({ alignContent: Alignment.TopStart }) {
+      ThemedBackground()
+      ThemeContentBoundary() {
+        Column() {
       this.TopBar()
       Stack() {
         Web({ src: MIS_URL, controller: this.controller })
@@ -142,10 +146,12 @@ struct MisWebPage {
       }
       .layoutWeight(1)
       .width('100%')
-    }
-    .width('100%')
-    .height('100%')
-    .backgroundColor(Theme.background())
+        }
+        .width('100%')
+        .height('100%')
+        .backgroundColor(Theme.background())
+      }
+    }.width('100%').height('100%')
   }
 
   @Builder

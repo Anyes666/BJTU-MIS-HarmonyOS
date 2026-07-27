@@ -9,6 +9,7 @@ import { GradeDetailParser } from '../parser/GradeDetailParser';
 import { GradeParser } from '../parser/GradeParser';
 import { WhiteListManager } from '../manager/WhiteListManager';
 import { Theme } from '../common/Theme';
+import { ThemeContentBoundary, ThemedBackground } from '../components/ThemedBackground';
 
 interface GradeWebResourceRequest {
   getRequestUrl(): string;
@@ -47,7 +48,10 @@ struct GradeDetailPage {
 
   build() {
     Stack() {
-      Column() {
+      ThemedBackground()
+      ThemeContentBoundary() {
+        Stack() {
+          Column() {
         this.TopBar()
         if (this.notFound) {
           this.MessageView('成绩记录未找到')
@@ -88,8 +92,12 @@ struct GradeDetailPage {
             this.loading = false;
             this.errorMessage = '成绩组成加载失败，本地成绩数据已保留';
           })
+          }
+        }
+        .width('100%')
+        .height('100%')
       }
-    }
+    }.width('100%').height('100%')
   }
 
   @Builder
@@ -118,14 +126,21 @@ struct GradeDetailPage {
   @Builder
   MessageView(message: string): void {
     Column() {
-      if (this.loading) {
-        LoadingProgress().width(36).height(36).color(Theme.primary())
+      Column() {
+        if (this.loading) {
+          LoadingProgress().width(36).height(36).color(Theme.primary())
+        }
+        Text(message)
+          .fontSize(15)
+          .fontColor(Theme.textSecondary())
+          .textAlign(TextAlign.Center)
+          .margin({ top: this.loading ? 16 : 0 })
       }
-      Text(message)
-        .fontSize(15)
-        .fontColor(Theme.textSecondary())
-        .textAlign(TextAlign.Center)
-        .margin({ top: this.loading ? 16 : 0 })
+      .width('100%')
+      .padding(24)
+      .borderRadius(14)
+      .backgroundColor(Theme.surface())
+      .backgroundBlurStyle(Theme.blurStyle())
     }
     .layoutWeight(1)
     .width('100%')
@@ -138,16 +153,7 @@ struct GradeDetailPage {
   DetailContent(): void {
     Scroll() {
       Column() {
-        Text(this.grade.detailTitle.length > 0 ? this.grade.detailTitle : this.grade.courseName)
-          .fontSize(21)
-          .fontWeight(FontWeight.Bold)
-          .fontColor(Theme.textPrimary())
-          .margin({ top: 24, bottom: 6 })
-          .textAlign(TextAlign.Center)
-        Text(this.grade.termLabel.length > 0 ? this.grade.termLabel : this.grade.termCode)
-          .fontSize(12)
-          .fontColor(Theme.textSecondary())
-          .margin({ bottom: 16 })
+        this.DetailHeaderCard()
         if (this.grade.detailFields.length > 0) {
           Column() {
             ForEach(this.grade.detailFields, (field: GradeDetailField) => {
@@ -162,6 +168,7 @@ struct GradeDetailPage {
           .padding(14)
           .borderRadius(12)
           .backgroundColor(Theme.surface())
+          .backgroundBlurStyle(Theme.blurStyle())
         }
         ForEach(this.grade.detailTables, (table: GradeDetailTable, tableIndex: number) => {
           this.DetailTableCard(table, tableIndex)
@@ -170,7 +177,13 @@ struct GradeDetailPage {
           Text('明细已保存在本地')
             .fontSize(11)
             .fontColor(Theme.textDisabled())
+            .width('100%')
+            .padding(10)
+            .borderRadius(10)
+            .backgroundColor(Theme.card())
+            .backgroundBlurStyle(Theme.blurStyle())
             .margin({ top: 18, bottom: 36 })
+            .textAlign(TextAlign.Center)
         }
       }
       .width('100%')
@@ -179,6 +192,27 @@ struct GradeDetailPage {
     }
     .width('100%')
     .layoutWeight(1)
+  }
+
+  @Builder
+  DetailHeaderCard(): void {
+    Column() {
+      Text(this.grade.detailTitle.length > 0 ? this.grade.detailTitle : this.grade.courseName)
+        .fontSize(21)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(Theme.textPrimary())
+        .textAlign(TextAlign.Center)
+      Text(this.grade.termLabel.length > 0 ? this.grade.termLabel : this.grade.termCode)
+        .fontSize(12)
+        .fontColor(Theme.textSecondary())
+        .margin({ top: 6 })
+    }
+    .width('100%')
+    .padding(16)
+    .borderRadius(14)
+    .backgroundColor(Theme.card())
+    .backgroundBlurStyle(Theme.blurStyle())
+    .margin({ top: 16, bottom: 12 })
   }
 
   @Builder
@@ -219,6 +253,7 @@ struct GradeDetailPage {
     .padding(14)
     .borderRadius(12)
     .backgroundColor(Theme.surface())
+    .backgroundBlurStyle(Theme.blurStyle())
     .margin({ top: 12 })
     .alignItems(HorizontalAlign.Start)
   }

@@ -62,6 +62,7 @@ export struct ExamView {
             .selected(this.selectedTermIndex())
             .value(this.selectedTermLabel())
             .backgroundColor(Theme.surface())
+            .backgroundBlurStyle(Theme.blurStyle())
             .layoutWeight(1)
             .onSelect((index: number) => {
               const terms: Array<ExamTermFilter> = this.termFilters();
@@ -175,6 +176,7 @@ export struct ExamView {
     .padding(14)
     .borderRadius(12)
     .backgroundColor(Theme.surface())
+    .backgroundBlurStyle(Theme.blurStyle())
     .opacity(this.isPast(exam) ? 0.62 : 1)
   }
 

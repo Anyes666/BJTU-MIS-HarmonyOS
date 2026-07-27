@@ -1,6 +1,7 @@
 import { ChangeEvent, ChangeKind, ModuleSyncRecord, SyncTarget } from '../model/CampusInfo';
 import { CourseDataStore } from '../store/CourseDataStore';
 import { Theme } from '../common/Theme';
+import { ThemeContentBoundary, ThemedBackground } from '../components/ThemedBackground';
 
 @Entry({ routeName: 'SyncCenterPage' })
 @Component
@@ -19,7 +20,10 @@ struct SyncCenterPage {
   }
 
   build() {
-    Column() {
+    Stack({ alignContent: Alignment.TopStart }) {
+      ThemedBackground()
+      ThemeContentBoundary() {
+        Column() {
       this.TopBar()
       Scroll() {
         Column() {
@@ -61,7 +65,9 @@ struct SyncCenterPage {
           }
         }.width('100%').padding({ left: 16, right: 16, top: 12, bottom: 28 })
       }.layoutWeight(1).width('100%')
-    }.width('100%').height('100%').backgroundColor(Theme.background())
+        }.width('100%').height('100%').backgroundColor(Theme.background())
+      }
+    }.width('100%').height('100%')
   }
 
   @Builder

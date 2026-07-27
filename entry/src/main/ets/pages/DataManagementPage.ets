@@ -4,6 +4,7 @@ import { Theme } from '../common/Theme';
 import { WhiteListManager } from '../manager/WhiteListManager';
 import { LoginState } from '../model/LoginState';
 import { CourseDataStore } from '../store/CourseDataStore';
+import { ThemeContentBoundary, ThemedBackground } from '../components/ThemedBackground';
 
 @Entry({ routeName: 'DataManagementPage' })
 @Component
@@ -13,7 +14,10 @@ struct DataManagementPage {
   private whiteListManager: WhiteListManager = WhiteListManager.getInstance();
 
   build() {
-    Column() {
+    Stack({ alignContent: Alignment.TopStart }) {
+      ThemedBackground()
+      ThemeContentBoundary() {
+        Column() {
       this.TopBar()
       Scroll() {
         Column() {
@@ -21,6 +25,10 @@ struct DataManagementPage {
             .fontSize(14)
             .fontColor(Theme.textSecondary())
             .width('100%')
+            .padding(10)
+            .borderRadius(10)
+            .backgroundColor(Theme.card())
+            .backgroundBlurStyle(Theme.blurStyle())
             .margin({ top: 20, bottom: 8 })
           this.ActionRow('清除课表', '删除本机已缓存的课表', () => {
             this.confirmClear('清除本地课表', '将清除所有已保存的课表数据。', () => {
@@ -41,6 +49,10 @@ struct DataManagementPage {
             .fontSize(14)
             .fontColor(Theme.textSecondary())
             .width('100%')
+            .padding(10)
+            .borderRadius(10)
+            .backgroundColor(Theme.card())
+            .backgroundBlurStyle(Theme.blurStyle())
             .margin({ top: 24, bottom: 8 })
           this.ActionRow('清除网页登录会话', '保留课表、考试和成绩', () => {
             this.confirmClear('清除登录会话', '将退出学校网页登录，本地校园数据保持不变。', () => {
@@ -65,6 +77,10 @@ struct DataManagementPage {
             .fontColor(Theme.textDisabled())
             .textAlign(TextAlign.Center)
             .width('100%')
+            .padding(12)
+            .borderRadius(10)
+            .backgroundColor(Theme.card())
+            .backgroundBlurStyle(Theme.blurStyle())
             .margin({ top: 20, bottom: 32 })
         }
         .width('100%')
@@ -72,10 +88,12 @@ struct DataManagementPage {
       }
       .layoutWeight(1)
       .width('100%')
-    }
-    .width('100%')
-    .height('100%')
-    .backgroundColor(Theme.background())
+        }
+        .width('100%')
+        .height('100%')
+        .backgroundColor(Theme.background())
+      }
+    }.width('100%').height('100%')
   }
 
   @Builder
@@ -126,6 +144,7 @@ struct DataManagementPage {
     .padding({ left: 16, right: 14, top: 10, bottom: 10 })
     .borderRadius(12)
     .backgroundColor(danger ? Theme.dangerBackground() : Theme.surface())
+    .backgroundBlurStyle(Theme.blurStyle())
     .margin({ bottom: 8 })
     .onClick(action)
   }
@@ -140,8 +159,8 @@ struct DataManagementPage {
       title: title,
       message: message,
       buttons: [
-        { text: '取消', color: '#007AFF' },
-        { text: '确认清除', color: '#FF3B30' }
+        { text: '取消', color: Theme.dialogPrimary() },
+        { text: '确认清除', color: Theme.dialogDanger() }
       ]
     }).then((result: Object) => {
       if (((result as Record<string, Object>)['index'] as number ?? -1) !== 1) {

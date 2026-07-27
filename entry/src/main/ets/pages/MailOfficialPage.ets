@@ -4,6 +4,7 @@ import { MailDetail, MailSnapshot, MailSummary } from '../model/MailInfo';
 import { CourseDataStore } from '../store/CourseDataStore';
 import { WhiteListManager } from '../manager/WhiteListManager';
 import { Theme } from '../common/Theme';
+import { ThemeContentBoundary, ThemedBackground } from '../components/ThemedBackground';
 
 const MAIL_SSO_URL: string = 'https://mis.bjtu.edu.cn/osys_sso_email/';
 
@@ -22,7 +23,10 @@ struct MailOfficialPage {
   private parsing: boolean = false;
 
   build() {
-    Column() {
+    Stack({ alignContent: Alignment.TopStart }) {
+      ThemedBackground()
+      ThemeContentBoundary() {
+        Column() {
       Row() {
         Button('返回').fontSize(14).backgroundColor(Color.Transparent).fontColor(Theme.primary())
           .onClick(() => { this.getUIContext().getRouter().back(); })
@@ -62,7 +66,9 @@ struct MailOfficialPage {
           }
         })
         .onErrorReceive(() => { this.statusText = '官方邮箱暂时无法访问，离线缓存仍可使用'; })
-    }.width('100%').height('100%').backgroundColor(Theme.background())
+        }.width('100%').height('100%').backgroundColor(Theme.background())
+      }
+    }.width('100%').height('100%')
   }
 
   private captureVisibleMail(): void {

@@ -25,6 +25,10 @@
       "value": "#FFFFFF"
     },
     {
+      "name": "app_course_text",
+      "value": "#18313B"
+    },
+    {
       "name": "app_primary_light",
       "value": "#E8F0FE"
     },
@@ -74,23 +78,23 @@
     },
     {
       "name": "app_course_default",
-      "value": "#2E7D98"
+      "value": "#B8DDE6"
     },
     {
       "name": "app_course_required",
-      "value": "#3B6EA8"
+      "value": "#BFD4EA"
     },
     {
       "name": "app_course_elective",
-      "value": "#7566A8"
+      "value": "#D7C9EB"
     },
     {
       "name": "app_course_lab",
-      "value": "#A56A34"
+      "value": "#E8CFB2"
     },
     {
       "name": "app_course_sport",
-      "value": "#3A7D5B"
+      "value": "#B9DCC9"
     }
   ]
 }

@@ -1,6 +1,7 @@
 import { MailFolder, MailSnapshot, MailSummary } from '../model/MailInfo';
 import { CourseDataStore } from '../store/CourseDataStore';
 import { Theme } from '../common/Theme';
+import { ThemeContentBoundary, ThemedBackground } from '../components/ThemedBackground';
 
 @Entry({ routeName: 'MailPage' })
 @Component
@@ -17,7 +18,10 @@ struct MailPage {
   }
 
   build() {
-    Column() {
+    Stack({ alignContent: Alignment.TopStart }) {
+      ThemedBackground()
+      ThemeContentBoundary() {
+        Column() {
       this.TopBar()
       if (this.snapshot.folders.length > 0) {
         Scroll() {
@@ -41,7 +45,14 @@ struct MailPage {
           Button('打开官方邮箱').fontSize(14).height(42).borderRadius(10)
             .backgroundColor(Theme.primary()).fontColor(Theme.onPrimary()).margin({ top: 18 })
             .onClick(() => { this.openOfficial(); })
-        }.layoutWeight(1).justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center)
+        }
+        .width('calc(100% - 32vp)')
+        .padding(24)
+        .borderRadius(14)
+        .backgroundColor(Theme.surface())
+        .backgroundBlurStyle(Theme.blurStyle())
+        .margin({ top: 96 })
+        .alignItems(HorizontalAlign.Center)
       } else {
         List({ space: 8 }) {
           ForEach(this.filteredMessages(), (mail: MailSummary) => {
@@ -60,6 +71,7 @@ struct MailPage {
                     .width('100%').maxLines(2).margin({ top: 5 })
                 }
               }.width('100%').padding(14).backgroundColor(Theme.surface()).borderRadius(12)
+                .backgroundBlurStyle(Theme.blurStyle())
                 .onClick(() => { this.openMessage(mail); })
             }
           }, (mail: MailSummary): string => mail.businessKey())
@@ -69,7 +81,9 @@ struct MailPage {
           .backgroundColor(Theme.primary()).fontColor(Theme.onPrimary()).margin({ bottom: 12 })
           .onClick(() => { this.openOfficial(); })
       }
-    }.width('100%').height('100%').backgroundColor(Theme.background())
+        }.width('100%').height('100%').backgroundColor(Theme.background())
+      }
+    }.width('100%').height('100%')
   }
 
   @Builder

@@ -66,6 +66,7 @@ export struct ScheduleView {
     .padding(4)
     .borderRadius(14)
     .backgroundColor(Theme.surface())
+    .backgroundBlurStyle(Theme.blurStyle())
     .margin({ left: 16, right: 16, top: 18, bottom: 10 })
   }
 
@@ -84,24 +85,24 @@ export struct ScheduleView {
 
   @Builder CurrentTermSummary(): void {
     Row() {
-      Text('本学期').fontSize(12).fontWeight(FontWeight.Medium)
-        .fontColor(Theme.textSecondary()).margin({ right: 8 })
-      Text(this.currentTermLabel())
-        .fontSize(14)
-        .fontWeight(FontWeight.Medium)
-        .fontColor(Theme.textPrimary())
-        .layoutWeight(1)
+      Column() {
+        Text('本学期课表').fontSize(15).fontWeight(FontWeight.Bold)
+          .fontColor(Theme.textPrimary())
+        Text(this.currentTermLabel()).fontSize(11).fontColor(Theme.textSecondary())
+          .margin({ top: 2 })
+      }.layoutWeight(1).alignItems(HorizontalAlign.Start)
       Text(this.courses.length.toString() + ' 门')
         .fontSize(11).fontWeight(FontWeight.Medium).fontColor(Theme.primary())
-        .padding({ left: 8, right: 8, top: 4, bottom: 4 })
-        .borderRadius(10).backgroundColor(Theme.primaryLight()).margin({ left: 8 })
+        .padding({ left: 10, right: 10, top: 5, bottom: 5 })
+        .borderRadius(12).backgroundColor(Theme.card())
+        .backgroundBlurStyle(Theme.blurStyle()).margin({ left: 8 })
     }
-    .width('calc(100% - 32vp)')
-    .height(50)
-    .padding({ left: 12, right: 8 })
+    .width('calc(100% - 24vp)')
+    .height(56)
+    .padding({ left: 14, right: 10 })
     .borderRadius(14)
-    .backgroundColor(Theme.surface())
-    .margin({ left: 16, right: 16, bottom: 10 })
+    .backgroundColor(Theme.primaryLight())
+    .margin({ left: 12, right: 12, bottom: 10 })
   }
 
   @Builder EmptyView(): void {
@@ -139,6 +140,7 @@ export struct ScheduleView {
       .padding({ left: 10, right: 10 })
       .borderRadius(14)
       .backgroundColor(Theme.surface())
+      .backgroundBlurStyle(Theme.blurStyle())
       .margin({ left: 12, right: 12, bottom: 8 })
       if (this.effectiveCurrentWeek() > 0 &&
           this.selectedWeek !== this.effectiveCurrentWeek()) {
@@ -195,8 +197,11 @@ export struct ScheduleView {
                 Text(session.campus).fontSize(11).fontColor(Theme.textDisabled()).margin({ left: 8 })
               }
             }.width('100%').margin({ top: 6 })
+            Text(this.sessionDisplayTime(session))
+              .fontSize(11).fontColor(Theme.textDisabled()).width('100%').margin({ top: 5 })
           }.width('100%').padding(12).borderRadius(10)
-           .backgroundColor(Theme.surface()).margin({ bottom: 8 })
+           .backgroundColor(Theme.surface()).backgroundBlurStyle(Theme.blurStyle())
+           .margin({ bottom: 8 })
         }
       }, (_: CourseSession, i: number): string => 'card_' + course.id + '_' + i)
     }.width('100%')
@@ -228,6 +233,17 @@ export struct ScheduleView {
     const today: Date = new Date(); const td: number = today.getDay();
     const dow: number = td === 0 ? 7 : td;
     return session.dayOfWeek === dow && session.containsWeek(this.selectedWeek);
+  }
+
+  private sessionDisplayTime(session: CourseSession): string {
+    if (session.timeRange.length > 0) {
+      return session.timeRange;
+    }
+    const times: Array<string> = [
+      '08:00-09:50', '10:10-12:00', '12:10-14:00', '14:10-16:00',
+      '16:20-18:10', '19:00-20:50', '21:00-21:50'
+    ];
+    return times[session.startPeriod - 1] ?? '';
   }
 
   private getTodayLabel(): string {

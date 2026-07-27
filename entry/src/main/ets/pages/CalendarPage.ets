@@ -3,6 +3,7 @@ import { CalendarEvent, CampusCalendar } from '../model/CampusInfo';
 import { SemesterInfo } from '../model/SemesterInfo';
 import { CourseDataStore } from '../store/CourseDataStore';
 import { Theme } from '../common/Theme';
+import { ThemeContentBoundary, ThemedBackground } from '../components/ThemedBackground';
 
 class CalendarDay {
   day: number = 0;
@@ -26,18 +27,30 @@ struct CalendarPage {
   }
 
   build() {
-    Column() {
-      this.TopBar()
-      Scroll() {
+    Stack({ alignContent: Alignment.TopStart }) {
+      ThemedBackground()
+      ThemeContentBoundary() {
         Column() {
-          this.TermCard()
-          this.MonthCard()
-          this.EventsCard()
-          Text(this.calendar.sourceLabel + ' · 离线校历数据')
-            .fontSize(10).fontColor(Theme.textDisabled()).margin({ top: 10, bottom: 30 })
-        }.width('100%').padding({ left: 16, right: 16 })
-      }.layoutWeight(1).width('100%')
-    }.width('100%').height('100%').backgroundColor(Theme.background())
+        this.TopBar()
+        Scroll() {
+          Column() {
+            this.TermCard()
+            this.MonthCard()
+            this.EventsCard()
+            Text(this.calendar.sourceLabel + ' · 离线校历数据')
+              .fontSize(10)
+              .fontColor(Theme.textDisabled())
+              .width('100%')
+              .padding(10)
+              .borderRadius(10)
+              .backgroundColor(Theme.card())
+              .backgroundBlurStyle(Theme.blurStyle())
+              .margin({ top: 10, bottom: 30 })
+          }.width('100%').padding({ left: 16, right: 16 })
+        }.layoutWeight(1).width('100%')
+        }.width('100%').height('100%').backgroundColor(Theme.background())
+      }
+    }.width('100%').height('100%')
   }
 
   @Builder
@@ -59,7 +72,8 @@ struct CalendarPage {
       Text(this.currentWeekText()).fontSize(13).fontColor(Theme.primary()).margin({ top: 6 })
       Text(this.startDateText()).fontSize(11).fontColor(Theme.textSecondary()).margin({ top: 4 })
     }.width('100%').padding(16).margin({ top: 12, bottom: 12 })
-     .borderRadius(12).backgroundColor(Theme.surface()).alignItems(HorizontalAlign.Start)
+     .borderRadius(12).backgroundColor(Theme.surface()).backgroundBlurStyle(Theme.blurStyle())
+     .alignItems(HorizontalAlign.Start)
   }
 
   @Builder
@@ -101,6 +115,7 @@ struct CalendarPage {
           this.displayYear + '_' + this.displayMonth + '_' + index)
       }.columnsTemplate('1fr 1fr 1fr 1fr 1fr 1fr 1fr').width('100%')
     }.width('100%').padding(14).borderRadius(12).backgroundColor(Theme.surface())
+      .backgroundBlurStyle(Theme.blurStyle())
   }
 
   @Builder
@@ -119,6 +134,7 @@ struct CalendarPage {
         }, (event: CalendarEvent, index: number): string => event.title + '_' + index)
       }
     }.width('100%').padding(16).margin({ top: 12 }).borderRadius(12).backgroundColor(Theme.surface())
+      .backgroundBlurStyle(Theme.blurStyle())
   }
 
   private monthDays(): Array<CalendarDay> {

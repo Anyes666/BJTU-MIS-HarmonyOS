@@ -70,6 +70,7 @@ export struct GradeView {
             .selected(this.selectedTermIndex())
             .value(this.selectedTermLabel())
             .backgroundColor(Theme.surface())
+            .backgroundBlurStyle(Theme.blurStyle())
             .layoutWeight(1)
             .onSelect((index: number) => {
               const terms: Array<GradeTermFilter> = this.termFilters();
@@ -144,6 +145,7 @@ export struct GradeView {
     .margin({ left: 16, right: 16, bottom: 12 })
     .borderRadius(14)
     .backgroundColor(Theme.surface())
+    .backgroundBlurStyle(Theme.blurStyle())
   }
 
   @Builder
@@ -180,6 +182,7 @@ export struct GradeView {
     .padding({ left: 14, right: 14, top: 10, bottom: 10 })
     .borderRadius(10)
     .backgroundColor(Theme.surface())
+    .backgroundBlurStyle(Theme.blurStyle())
     .alignItems(VerticalAlign.Center)
     .onClick(() => {
       const params: Record<string, string> = { 'gradeId': grade.id };

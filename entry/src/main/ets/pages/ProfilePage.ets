@@ -1,6 +1,7 @@
 import { ProfileField, StudentProfile } from '../model/CampusInfo';
 import { CourseDataStore } from '../store/CourseDataStore';
 import { Theme } from '../common/Theme';
+import { ThemeContentBoundary, ThemedBackground } from '../components/ThemedBackground';
 
 @Entry({ routeName: 'ProfilePage' })
 @Component
@@ -13,7 +14,10 @@ struct ProfilePage {
   }
 
   build() {
-    Column() {
+    Stack({ alignContent: Alignment.TopStart }) {
+      ThemedBackground()
+      ThemeContentBoundary() {
+        Column() {
       this.TopBar()
       if (!this.profile.hasData()) {
         this.EmptyView()
@@ -26,6 +30,11 @@ struct ProfilePage {
             Text('信息来自学校官方页面，仅保存在本机')
               .fontSize(11)
               .fontColor(Theme.textDisabled())
+              .width('100%')
+              .padding(12)
+              .borderRadius(10)
+              .backgroundColor(Theme.card())
+              .backgroundBlurStyle(Theme.blurStyle())
               .margin({ top: 12, bottom: 32 })
           }
           .width('100%')
@@ -34,10 +43,12 @@ struct ProfilePage {
         .layoutWeight(1)
         .width('100%')
       }
-    }
-    .width('100%')
-    .height('100%')
-    .backgroundColor(Theme.background())
+        }
+        .width('100%')
+        .height('100%')
+        .backgroundColor(Theme.background())
+      }
+    }.width('100%').height('100%')
   }
 
   @Builder

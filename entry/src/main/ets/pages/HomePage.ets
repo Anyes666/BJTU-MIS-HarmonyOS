@@ -18,6 +18,7 @@ import { SyncPhase, SyncStatus } from '../model/SyncStatus';
 import { WhiteListManager } from '../manager/WhiteListManager';
 import { AcademicCalendar } from '../model/AcademicCalendar';
 import { ChangeEvent, SyncTarget } from '../model/CampusInfo';
+import { ThemeContentBoundary, ThemedBackground } from '../components/ThemedBackground';
 
 const MIS_URL: string = 'https://mis.bjtu.edu.cn/';
 
@@ -74,7 +75,10 @@ struct HomePage {
 
   build() {
     Stack() {
-      Tabs({ barPosition: BarPosition.End, controller: this.tabsController }) {
+      ThemedBackground()
+      ThemeContentBoundary() {
+        Stack() {
+          Tabs({ barPosition: BarPosition.End, index: this.currentTabIndex, controller: this.tabsController }) {
         TabContent() { this.HomeContentView() }.tabBar(this.TabBarBuilder('首页', 0))
         TabContent() {
           ScheduleView({ dataRevision: this.dataRevision, isActive: this.currentTabIndex === 1 })
@@ -129,9 +133,14 @@ struct HomePage {
               this.backgroundCoordinator.onNetworkError();
             }
           })
+          }
+        }
+        .width('100%')
+        .height('100%')
+        .backgroundColor(Theme.background())
       }
     }
-    .width('100%').height('100%').backgroundColor(Theme.background())
+    .width('100%').height('100%')
   }
 
   @Builder TabBarBuilder(label: string, index: number): void {
@@ -201,6 +210,7 @@ struct HomePage {
     .padding(22)
     .borderRadius(18)
     .backgroundColor(Theme.surface())
+    .backgroundBlurStyle(Theme.blurStyle())
     .margin({ top: 72 })
     .alignItems(HorizontalAlign.Center)
   }
@@ -240,6 +250,7 @@ struct HomePage {
     .padding(14)
     .borderRadius(12)
     .backgroundColor(Theme.surface())
+    .backgroundBlurStyle(Theme.blurStyle())
     .margin({ top: 12 })
   }
 
@@ -271,7 +282,8 @@ struct HomePage {
       }
     }
     .width('100%').padding(16).borderRadius(12)
-    .backgroundColor(Theme.surface()).margin({ top: 60 }).alignItems(HorizontalAlign.Center)
+    .backgroundColor(Theme.surface()).backgroundBlurStyle(Theme.blurStyle())
+    .margin({ top: 60 }).alignItems(HorizontalAlign.Center)
   }
 
   @Builder QuickActions(): void {
@@ -316,6 +328,7 @@ struct HomePage {
       }.layoutWeight(1).alignItems(HorizontalAlign.Start).margin({ left: 10 })
     }
     .layoutWeight(1).height(78).padding(12).borderRadius(12).backgroundColor(Theme.surface())
+    .backgroundBlurStyle(Theme.blurStyle())
     .onClick(() => {
       if (tabIndex >= 0) {
         this.tabsController.changeIndex(tabIndex);
@@ -345,6 +358,7 @@ struct HomePage {
         Text('进入同步中心查看全部').fontSize(11).fontColor(Theme.textSecondary())
           .margin({ top: 10 }).alignSelf(ItemAlign.End)
       }.width('100%').padding(14).borderRadius(12).backgroundColor(Theme.surface())
+        .backgroundBlurStyle(Theme.blurStyle())
         .margin({ top: 12 })
         .onClick(() => {
           this.getUIContext().getRouter().pushUrl({ url: 'pages/SyncCenterPage' });

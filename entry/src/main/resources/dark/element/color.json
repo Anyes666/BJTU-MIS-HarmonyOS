@@ -25,6 +25,10 @@
       "value": "#FFFFFF"
     },
     {
+      "name": "app_course_text",
+      "value": "#FFFFFF"
+    },
+    {
       "name": "app_primary_light",
       "value": "#163A5F"
     },

@@ -1,6 +1,7 @@
 import { CourseInfo, CourseSession } from '../model/CourseInfo';
 import { CourseDataStore } from '../store/CourseDataStore';
 import { Theme } from '../common/Theme';
+import { ThemeContentBoundary, ThemedBackground } from '../components/ThemedBackground';
 
 @Entry({ routeName: 'CourseDetailPage' })
 @Component
@@ -21,34 +22,82 @@ struct CourseDetailPage {
   }
 
   build() {
-    Column() {
-      Row() {
-        Button('返回').fontSize(14).backgroundColor(Color.Transparent).fontColor(Theme.primary())
-          .onClick(() => { this.getUIContext().getRouter().back(); })
-        Text('课程详情').fontSize(16).fontWeight(FontWeight.Medium)
-          .fontColor(Theme.textPrimary()).layoutWeight(1).textAlign(TextAlign.Center)
-        Row(){}.width(60).height(44)
-      }.width('100%').height(44).padding({ left: 8, right: 8 }).backgroundColor(Theme.topBackground())
-      if (this.notFound) { Text('课程未找到').fontSize(16).fontColor(Theme.textDisabled()).margin({ top: 100 }) }
-      else { this.CourseDetailContent() }
-    }.width('100%').height('100%').backgroundColor(Theme.background())
+    Stack({ alignContent: Alignment.TopStart }) {
+      ThemedBackground()
+      ThemeContentBoundary() {
+        Column() {
+        Row() {
+          Button('返回').fontSize(14).backgroundColor(Color.Transparent).fontColor(Theme.primary())
+            .onClick(() => { this.getUIContext().getRouter().back(); })
+          Text('课程详情').fontSize(16).fontWeight(FontWeight.Medium)
+            .fontColor(Theme.textPrimary()).layoutWeight(1).textAlign(TextAlign.Center)
+          Row(){}.width(60).height(44)
+        }.width('100%').height(44).padding({ left: 8, right: 8 }).backgroundColor(Theme.topBackground())
+        if (this.notFound) {
+          Text('课程未找到')
+            .fontSize(16)
+            .fontColor(Theme.textDisabled())
+            .padding(18)
+            .borderRadius(12)
+            .backgroundColor(Theme.surface())
+            .backgroundBlurStyle(Theme.blurStyle())
+            .margin({ top: 100 })
+        }
+        else { this.CourseDetailContent() }
+        }.width('100%').height('100%').backgroundColor(Theme.background())
+      }
+    }.width('100%').height('100%')
   }
 
   @Builder CourseDetailContent(): void {
     Scroll() {
       Column() {
-        Text(this.course.name).fontSize(22).fontWeight(FontWeight.Bold).fontColor(Theme.textPrimary())
-          .margin({ top: 24, bottom: 16 }).alignSelf(ItemAlign.Center)
-        if (this.course.courseCode.length > 0) { this.DRow('课程代码', this.course.courseCode) }
-        this.DRow('教师', this.course.teacher)
-        this.DRow('类型', this.course.courseType)
-        Text('上课安排').fontSize(14).fontColor(Theme.textSecondary()).margin({ top: 20, bottom: 8 }).alignSelf(ItemAlign.Start)
+        this.CourseSummaryCard()
+        Text('上课安排')
+          .fontSize(14)
+          .fontColor(Theme.textSecondary())
+          .width('100%')
+          .padding(10)
+          .borderRadius(10)
+          .backgroundColor(Theme.card())
+          .backgroundBlurStyle(Theme.blurStyle())
+          .margin({ top: 12, bottom: 8 })
         ForEach(this.course.sessions, (session: CourseSession) => { this.SCard(session) },
           (_: CourseSession, i: number): string => 'dets_' + i)
         Text('更新时间: ' + new Date(this.course.updateTime).toLocaleString())
-          .fontSize(11).fontColor(Theme.textDisabled()).margin({ top: 24, bottom: 40 }).alignSelf(ItemAlign.Center)
+          .fontSize(11)
+          .fontColor(Theme.textDisabled())
+          .width('100%')
+          .padding(10)
+          .borderRadius(10)
+          .backgroundColor(Theme.card())
+          .backgroundBlurStyle(Theme.blurStyle())
+          .margin({ top: 16, bottom: 40 })
+          .textAlign(TextAlign.Center)
       }.width('100%').padding({ left: 16, right: 16 }).alignItems(HorizontalAlign.Center)
     }.width('100%').layoutWeight(1)
+  }
+
+  @Builder CourseSummaryCard(): void {
+    Column() {
+      Text(this.course.name)
+        .fontSize(22)
+        .fontWeight(FontWeight.Bold)
+        .fontColor(Theme.textPrimary())
+        .margin({ bottom: 10 })
+        .alignSelf(ItemAlign.Center)
+      if (this.course.courseCode.length > 0) {
+        this.DRow('课程代码', this.course.courseCode)
+      }
+      this.DRow('教师', this.course.teacher)
+      this.DRow('类型', this.course.courseType)
+    }
+    .width('100%')
+    .padding(16)
+    .borderRadius(14)
+    .backgroundColor(Theme.surface())
+    .backgroundBlurStyle(Theme.blurStyle())
+    .margin({ top: 16 })
   }
 
   @Builder DRow(label: string, value: string): void {
@@ -65,7 +114,8 @@ struct CourseDetailPage {
       this.SRow('周次', this.wkLbl(session))
       this.SRow('教室', session.classroom.length > 0 ? session.classroom : '暂无')
       this.SRow('校区', session.campus.length > 0 ? session.campus : '暂无')
-    }.width('100%').padding(12).borderRadius(10).backgroundColor(Theme.surface()).margin({ top: 8 }).alignItems(HorizontalAlign.Start)
+    }.width('100%').padding(12).borderRadius(10).backgroundColor(Theme.surface())
+      .backgroundBlurStyle(Theme.blurStyle()).margin({ top: 8 }).alignItems(HorizontalAlign.Start)
   }
 
   @Builder SRow(label: string, value: string): void {

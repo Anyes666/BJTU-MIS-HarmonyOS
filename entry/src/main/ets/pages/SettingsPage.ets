@@ -35,6 +35,8 @@ export struct SettingsView {
       Column() {
         Text('设置').fontSize(24).fontWeight(FontWeight.Bold).fontColor(Theme.textPrimary())
           .margin({ top: 60, bottom: 24 }).alignSelf(ItemAlign.Center)
+        this.AppearanceCard()
+        this.SecDiv()
         this.SyncStatusCard()
         this.SecDiv()
         this.DataActionsCard()
@@ -45,6 +47,46 @@ export struct SettingsView {
   }
 
   @Builder SecDiv(): void { Divider().width('90%').color(Theme.border()).margin({ top: 4, bottom: 4 }) }
+
+  @Builder
+  AppearanceCard(): void {
+    Row() {
+      Image(Theme.activeThumbnail())
+        .width(68)
+        .height(84)
+        .objectFit(ImageFit.Cover)
+        .borderRadius(12)
+      Column() {
+        Text('个性化外观')
+          .fontSize(15)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(Theme.textPrimary())
+        Text(Theme.activeThemeName())
+          .fontSize(13)
+          .fontColor(Theme.primary())
+          .margin({ top: 6 })
+        Text('5 套照片主题，可预览浅色与深色效果')
+          .fontSize(11)
+          .fontColor(Theme.textSecondary())
+          .margin({ top: 5 })
+      }
+      .layoutWeight(1)
+      .alignItems(HorizontalAlign.Start)
+      .margin({ left: 14 })
+      Text('›')
+        .fontSize(24)
+        .fontColor(Theme.textDisabled())
+    }
+    .width('100%')
+    .padding(14)
+    .borderRadius(14)
+    .backgroundColor(Theme.card())
+    .backgroundBlurStyle(Theme.blurStyle())
+    .margin({ bottom: 8 })
+    .onClick(() => {
+      this.getUIContext().getRouter().pushUrl({ url: 'pages/ThemeGalleryPage' });
+    })
+  }
 
   @Builder SyncStatusCard(): void {
     Column() {
@@ -65,7 +107,8 @@ export struct SettingsView {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .margin({ top: 6 })
       }
-    }.width('100%').padding(16).borderRadius(12).backgroundColor(Theme.surface()).margin({ top: 8 })
+    }.width('100%').padding(16).borderRadius(12).backgroundColor(Theme.surface())
+      .backgroundBlurStyle(Theme.blurStyle()).margin({ top: 8 })
   }
 
   @Builder RowInfo(label: string, value: string): void {
@@ -109,7 +152,10 @@ export struct SettingsView {
     const pageRouter = this.getUIContext().getRouter();
     promptAction.showDialog({
       title: '重新登录', message: '将清除当前网页登录会话，本地校园数据保持不变。',
-      buttons: [{ text: '取消', color: '#007AFF' }, { text: '继续', color: '#FF3B30' }]
+      buttons: [
+        { text: '取消', color: Theme.dialogPrimary() },
+        { text: '继续', color: Theme.dialogDanger() }
+      ]
     }).then((r: Object) => {
       if (((r as Record<string,Object>)['index'] as number ?? -1) === 1) {
         webview.WebCookieManager.clearAllCookiesSync();

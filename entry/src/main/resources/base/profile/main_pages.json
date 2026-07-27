@@ -8,6 +8,7 @@
     "pages/ProgressPage",
     "pages/CalendarPage",
     "pages/DataManagementPage",
+    "pages/ThemeGalleryPage",
     "pages/SyncCenterPage",
     "pages/MailPage",
     "pages/MailDetailPage",
