@@ -9,6 +9,7 @@
     "pages/CalendarPage",
     "pages/DataManagementPage",
     "pages/ThemeGalleryPage",
+    "pages/CustomThemePage",
     "pages/SyncCenterPage",
     "pages/MailPage",
     "pages/MailDetailPage",

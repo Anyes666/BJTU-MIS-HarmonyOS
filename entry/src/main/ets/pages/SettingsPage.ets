@@ -65,7 +65,7 @@ export struct SettingsView {
           .fontSize(13)
           .fontColor(Theme.primary())
           .margin({ top: 6 })
-        Text('5 套照片主题，可预览浅色与深色效果')
+        Text('5 套预设与自定义照片，自动适配浅色和深色')
           .fontSize(11)
           .fontColor(Theme.textSecondary())
           .margin({ top: 5 })

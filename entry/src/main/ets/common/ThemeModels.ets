@@ -9,6 +9,9 @@ export enum AppThemeMode {
   DARK = 'dark'
 }
 
+export const MIN_CUSTOM_THEME_ZOOM: number = 1.0;
+export const MAX_CUSTOM_THEME_ZOOM: number = 4.0;
+
 class RgbColor {
   r: number = 0;
   g: number = 0;
@@ -103,6 +106,58 @@ export class BuiltInThemeDefinition {
       ThemePaletteFactory.create(seedColor, neutral, AppThemeMode.LIGHT, lightScrimOpacity);
     this.darkPalette =
       ThemePaletteFactory.create(seedColor, neutral, AppThemeMode.DARK, darkScrimOpacity);
+  }
+}
+
+export class CustomThemeProfile {
+  imagePath: string = '';
+  imageWidth: number = 1;
+  imageHeight: number = 1;
+  seedColor: string = '#245A78';
+  neutral: boolean = false;
+  focusX: number = 0.5;
+  focusY: number = 0.5;
+  lightScrimOpacity: number = 0.20;
+  darkScrimOpacity: number = 0.52;
+  temporary: boolean = false;
+  zoomScale: number = MIN_CUSTOM_THEME_ZOOM;
+
+  constructor(
+    imagePath: string,
+    imageWidth: number,
+    imageHeight: number,
+    seedColor: string,
+    neutral: boolean,
+    focusX: number,
+    focusY: number,
+    lightScrimOpacity: number,
+    darkScrimOpacity: number,
+    temporary: boolean,
+    zoomScale: number = MIN_CUSTOM_THEME_ZOOM
+  ) {
+    this.imagePath = imagePath;
+    this.imageWidth = imageWidth;
+    this.imageHeight = imageHeight;
+    this.seedColor = seedColor;
+    this.neutral = neutral;
+    this.focusX = focusX;
+    this.focusY = focusY;
+    this.lightScrimOpacity = lightScrimOpacity;
+    this.darkScrimOpacity = darkScrimOpacity;
+    this.temporary = temporary;
+    this.zoomScale = zoomScale;
+  }
+}
+
+export class ThemeColorAnalysis {
+  seedColor: string = '#245A78';
+  neutral: boolean = false;
+  luminance: number = 0.5;
+
+  constructor(seedColor: string, neutral: boolean, luminance: number) {
+    this.seedColor = seedColor;
+    this.neutral = neutral;
+    this.luminance = luminance;
   }
 }
 

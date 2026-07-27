@@ -43,6 +43,7 @@ struct ThemeGalleryPage {
                 .backgroundColor(Theme.surface())
                 .backgroundBlurStyle(Theme.blurStyle())
                 .margin({ top: 12, bottom: 12 })
+              this.CustomThemeEntry()
               this.ThemeGrid()
               Button('应用主题')
                 .width('100%')
@@ -70,6 +71,64 @@ struct ThemeGalleryPage {
     }
     .width('100%')
     .height('100%')
+  }
+
+  @Builder
+  private CustomThemeEntry(): void {
+    Row() {
+      if (this.themeManager.hasCustomTheme()) {
+        Image(this.themeManager.customImageUri())
+          .width(78)
+          .height(96)
+          .objectFit(ImageFit.Cover)
+          .borderRadius(12)
+      } else {
+        Text('＋')
+          .width(78)
+          .height(96)
+          .fontSize(38)
+          .fontColor(Theme.primary())
+          .textAlign(TextAlign.Center)
+          .borderRadius(12)
+          .backgroundColor(Theme.surface())
+      }
+      Column() {
+        Text('自定义照片')
+          .fontSize(16)
+          .fontWeight(FontWeight.Bold)
+          .fontColor(Theme.textPrimary())
+        Text(this.themeManager.hasCustomTheme() ? '更换照片或调整背景取景' : '从系统相册选择，自动提取主色')
+          .fontSize(12)
+          .fontColor(Theme.textSecondary())
+          .margin({ top: 7 })
+        if (this.selectedThemeId === 'custom_photo') {
+          Text('当前主题')
+            .fontSize(12)
+            .fontColor(Theme.primary())
+            .margin({ top: 7 })
+        }
+      }
+      .layoutWeight(1)
+      .alignItems(HorizontalAlign.Start)
+      .margin({ left: 14 })
+      Text('›')
+        .fontSize(26)
+        .fontColor(Theme.textDisabled())
+    }
+    .width('100%')
+    .padding(12)
+    .borderRadius(14)
+    .backgroundColor(Theme.card())
+    .backgroundBlurStyle(Theme.blurStyle())
+    .border({
+      width: this.selectedThemeId === 'custom_photo' ? 2 : 1,
+      color: this.selectedThemeId === 'custom_photo' ? Theme.primary() : Theme.border()
+    })
+    .margin({ bottom: 12 })
+    .onClick(() => {
+      this.themeManager.cancelPreview();
+      this.getUIContext().getRouter().pushUrl({ url: 'pages/CustomThemePage' });
+    })
   }
 
   @Builder

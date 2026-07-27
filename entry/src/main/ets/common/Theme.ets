@@ -87,11 +87,17 @@ export class Theme {
     return Theme.isPhotoTheme() ? Theme.palette().overlay : Color.Transparent;
   }
 
-  static backgroundImage(): Resource {
+  static backgroundImage(): ResourceStr {
+    if (ThemeManager.getInstance().isCustomTheme()) {
+      return ThemeManager.getInstance().customImageUri();
+    }
     return ThemeRegistry.backgroundResource(Theme.activeThemeId());
   }
 
-  static activeThumbnail(): Resource {
+  static activeThumbnail(): ResourceStr {
+    if (ThemeManager.getInstance().isCustomTheme()) {
+      return ThemeManager.getInstance().customImageUri();
+    }
     return ThemeRegistry.thumbnailResource(Theme.activeThemeId());
   }
 
@@ -109,6 +115,10 @@ export class Theme {
 
   static focusY(): number {
     return ThemeManager.getInstance().currentDefinition().focusY;
+  }
+
+  static backgroundZoomScale(): number {
+    return ThemeManager.getInstance().currentZoomScale();
   }
 
   static backgroundImageWidth(): number {

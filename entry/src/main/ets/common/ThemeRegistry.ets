@@ -4,6 +4,7 @@ import {
 } from './ThemeModels';
 
 export const DEFAULT_THEME_ID: string = 'classic_default';
+export const CUSTOM_THEME_ID: string = 'custom_photo';
 
 const BUILT_IN_THEMES: Array<BuiltInThemeDefinition> = [
   new BuiltInThemeDefinition(

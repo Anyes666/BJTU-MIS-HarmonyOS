@@ -63,7 +63,8 @@ export struct ThemedBackground {
   private coverScale(): number {
     const imageWidth: number = Math.max(Theme.backgroundImageWidth(), 1);
     const imageHeight: number = Math.max(Theme.backgroundImageHeight(), 1);
-    return Math.max(this.containerWidth / imageWidth, this.containerHeight / imageHeight);
+    return Math.max(this.containerWidth / imageWidth, this.containerHeight / imageHeight) *
+      Theme.backgroundZoomScale();
   }
 
   private coveredImageWidth(): number {

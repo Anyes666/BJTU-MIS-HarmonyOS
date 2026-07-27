@@ -92,7 +92,7 @@ struct CalendarPage {
         ForEach(['一', '二', '三', '四', '五', '六', '日'], (label: string) => {
           Text(label).fontSize(11).fontColor(Theme.textSecondary())
             .width('14.28%').height(28).textAlign(TextAlign.Center)
-        })
+        }, (label: string): string => label)
       }.width('100%').margin({ top: 6 })
       Grid() {
         ForEach(this.monthDays(), (item: CalendarDay, index: number) => {
